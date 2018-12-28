@@ -84,7 +84,7 @@ hygieia-ui:
   ingress:
     enabled: true
     hosts:
-      - dashboard.ekaas.qcorpaa.aa.com
+      - dashboard.local
   env:
     API_HOST: dashboard-hygieia-api
     API_PORT: "8080"
