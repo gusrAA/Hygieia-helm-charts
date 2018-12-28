@@ -1,0 +1,64 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "hygieia-api-audit.fullname" . }}
+  labels:
+    app: {{ template "hygieia-api-audit.name" . }}
+    chart: {{ template "hygieia-api-audit.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "hygieia-api-audit.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "hygieia-api-audit.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      initContainers:
+      - name: waiting-for-mongodb
+        image: busybox
+        command: 
+          - 'sh'
+          - '-c'
+          - 'until nslookup {{ .Release.Name }}-mongodb; do echo waiting for mongodb; sleep 2; done;'
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+{{-  range $key, $val := .Values.env }}
+            - name: {{ $key | quote }}
+              value: {{ toString $val | quote }}
+{{- end }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+# TODO: Find or implement a healthcheck api
+#          livenessProbe:
+#            httpGet:
+#              path: /
+#              port: http
+#          readinessProbe:
+#            httpGet:
+#              path: /
+#              port: http
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}

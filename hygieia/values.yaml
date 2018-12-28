@@ -1,0 +1,90 @@
+# Default values for hygieia.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: nginx
+  tag: stable
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  path: /
+  hosts:
+    - chart-example.local
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Mongodb default configurations
+mongodb:
+  persistence:
+    enabled: false
+  usePassword: true # Enable authentication
+  # MongoDB admin password
+  # ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#setting-the-root-password-on-first-run
+  mongodbRootPassword: admin
+  # MongoDB custom user and database
+  # ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-a-user-and-database-on-first-run
+  mongodbUsername: username
+  mongodbPassword: password
+  mongodbDatabase: databas
+
+hygieia-api:
+  image:
+    pullPolicy: Always
+  env:
+    SPRING_DATA_MONGODB_HOST: dashboard-mongodb
+    SPRING_DATA_MONGODB_PORT: 27017
+    SPRING_DATA_MONGODB_DATABASE: databas
+    SPRING_DATA_MONGODB_USERNAME: username
+    SPRING_DATA_MONGODB_PASSWORD: password
+
+hygieia-api-audit:
+  image:
+    pullPolicy: Always
+  env:
+    SPRING_DATA_MONGODB_HOST: dashboard-mongodb
+    SPRING_DATA_MONGODB_PORT: 27017
+    SPRING_DATA_MONGODB_DATABASE: databas
+    SPRING_DATA_MONGODB_USERNAME: username
+    SPRING_DATA_MONGODB_PASSWORD: password
+
+hygieia-ui:
+  image:
+    pullPolicy: Always
+  ingress:
+    enabled: true
+    hosts:
+      - dashboard.ekaas.qcorpaa.aa.com
+  env:
+    API_HOST: dashboard-hygieia-api
+    API_PORT: "8080"
