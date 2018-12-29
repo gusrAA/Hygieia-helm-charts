@@ -1,26 +1,26 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: {{ template "api.fullname" . }}
+  name: {{ template "hygieia.fullname" . }}
   labels:
-    app: {{ template "api.name" . }}
-    chart: {{ template "api.chart" . }}
+    app: {{ template "hygieia.name" . }}
+    chart: {{ template "hygieia.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.audit.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "api.name" . }}
+      app: {{ template "hygieia.name" . }}
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "api.name" . }}
+        app: {{ template "hygieia.name" . }}
         release: {{ .Release.Name }}
     spec:
       initContainers:
-      - name: wait-for-mongo
+      - name: waiting-for-mongodb
         image: busybox
         command: 
           - 'sh'
@@ -28,8 +28,8 @@ spec:
           - 'until nslookup {{ .Release.Name }}-mongodb; do echo waiting for mongodb; sleep 2; done;'
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.audit.image.repository }}:{{ .Values.audit.image.tag }}"
+          imagePullPolicy: {{ .Values.audit.image.pullPolicy }}
           env:
 {{-  range $key, $val := .Values.env }}
             - name: {{ $key | quote }}
@@ -49,16 +49,16 @@ spec:
 #              path: /
 #              port: http
           resources:
-{{ toYaml .Values.resources | indent 12 }}
-    {{- with .Values.nodeSelector }}
+{{ toYaml .Values.audit.resources | indent 12 }}
+    {{- with .Values.audit.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
     {{- end }}
-    {{- with .Values.affinity }}
+    {{- with .Values.audit.affinity }}
       affinity:
 {{ toYaml . | indent 8 }}
     {{- end }}
-    {{- with .Values.tolerations }}
+    {{- with .Values.audit.tolerations }}
       tolerations:
 {{ toYaml . | indent 8 }}
     {{- end }}

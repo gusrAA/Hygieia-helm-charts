@@ -1,7 +1,7 @@
 dependencies:
-  - name: mongodb
-    version: "> 4.3.1"
-    repository: https://kubernetes-charts.storage.googleapis.com
+#  - name: mongodb
+#    version: "> 4.3.1"
+#    repository: https://kubernetes-charts.storage.googleapis.com
 #  - name: hygieia-api
 #    version: 0.1.0
 #    repository: https://helmet.ekaas.qcorpaa.aa.com/charts
