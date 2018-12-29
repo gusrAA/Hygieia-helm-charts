@@ -39,6 +39,8 @@ env:
   #Monitor Widget proxy credentials
   #MONITOR_PROXY_USERNAME: 
   #MONITOR_PROXY_PASSWORD: 
+  API_HOST: api
+  API_PORT: "8080"
 
 # Mongodb default configurations
 mongodb:
@@ -53,6 +55,14 @@ mongodb:
   mongodbUsername: username
   mongodbPassword: password
   mongodbDatabase: databas
+
+ingress:
+  enabled: false
+  annotations: {}
+  path: /
+  hosts:
+    - dashboard.com
+  tls: []
 
 api:
   replicaCount: 1
@@ -75,13 +85,13 @@ audit:
     port: 8080
   resources: {}
 
-hygieia-ui:
+ui:
+  replicaCount: 1
   image:
-    pullPolicy: Always
-  ingress:
-    enabled: true
-    hosts:
-      - dashboard.local
-  env:
-    API_HOST: dashboard-hygieia-api
-    API_PORT: "8080"
+    repository: hygieia/ui
+    tag: 2.0.5
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 80
+  resources: {}
