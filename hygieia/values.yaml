@@ -3,12 +3,17 @@
 # Declare variables to be passed into your templates.
 
 env:
-  SPRING_DATA_MONGODB_HOST: mongodb
-  SPRING_DATA_MONGODB_PORT: 27017
+  # env.SPRINT_DATA_MONGODB_HOST
+  # Set this if you already have an external mongodb instance you want to use
+  #SPRING_DATA_MONGODB_HOST: mongodb
+  # env.SPRINT_DATA_MONGODB_PORT
+  # Set this if you already have an external mongodb instance you want to use
+  #SPRING_DATA_MONGODB_PORT: 27017
   SPRING_DATA_MONGODB_DATABASE: dashboarddb
   SPRING_DATA_MONGODB_USERNAME: dashboarduser
   SPRING_DATA_MONGODB_PASSWORD: dbpassword
-  #API encryption key. Optional. See http://capitalone.github.io/Hygieia/setup.html#encryption for private-repos	
+  # API encryption key. Optional.
+  # See http://capitalone.github.io/Hygieia/setup.html#encryption for private-repos	
   KEY: ""
   LOG_REQUEST: false
   LOG_SPLUNK_REQUEST: false
@@ -39,11 +44,12 @@ env:
   #Monitor Widget proxy credentials
   #MONITOR_PROXY_USERNAME: 
   #MONITOR_PROXY_PASSWORD: 
-  API_HOST: api
-  API_PORT: "8080"
 
 # Mongodb default configurations
 mongodb:
+  # .mongodb.enabled
+  # Set to true to spin up mongodb in k8s
+  enabled: true
   persistence:
     enabled: false
   usePassword: true # Enable authentication
@@ -52,22 +58,23 @@ mongodb:
   mongodbRootPassword: admin
   # MongoDB custom user and database
   # ref: https://github.com/bitnami/bitnami-docker-mongodb/blob/master/README.md#creating-a-user-and-database-on-first-run
-  mongodbUsername: username
-  mongodbPassword: password
-  mongodbDatabase: databas
+  mongodbUsername: dashboarduser
+  mongodbPassword: dbpassword
+  mongodbDatabase: dashboarddb
 
 ingress:
-  enabled: false
+  enabled: true
   annotations: {}
   path: /
   hosts:
-    - dashboard.com
+    - stupid.ekaas.qcorpaa.aa.com
   tls: []
 
 api:
   replicaCount: 1
   image:
-    repository: hygieia/api
+    repository: nexusread.aa.com:18444/hygieia-api
+    #repository: hygieia/api
     tag: 2.0.5
     pullPolicy: IfNotPresent
   service:
@@ -77,7 +84,8 @@ api:
 
 audit:
   image:
-    repository: hygieia/api-audit
+    repository: nexusread.aa.com:18444/hygieia-api-audit
+    #repository: hygieia/api-audit
     tag: 2.0.5
     pullPolicy: Always
   service:
@@ -88,7 +96,8 @@ audit:
 ui:
   replicaCount: 1
   image:
-    repository: hygieia/ui
+    repository: nexusread.aa.com:18444/hygieia-ui
+    #repository: hygieia/ui
     tag: 2.0.5
     pullPolicy: IfNotPresent
   service:

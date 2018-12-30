@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "hygieia.fullname" . }}-api
+  name: {{ template "api.name" . }}
   labels:
     app: {{ template "hygieia.name" . }}
     chart: {{ template "hygieia.chart" . }}

@@ -1,7 +1,7 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: {{ template "hygieia.fullname" . }}
+  name: {{ template "audit.name" . }}
   labels:
     app: {{ template "hygieia.name" . }}
     chart: {{ template "hygieia.chart" . }}
@@ -31,10 +31,7 @@ spec:
           image: "{{ .Values.audit.image.repository }}:{{ .Values.audit.image.tag }}"
           imagePullPolicy: {{ .Values.audit.image.pullPolicy }}
           env:
-{{-  range $key, $val := .Values.env }}
-            - name: {{ $key | quote }}
-              value: {{ toString $val | quote }}
-{{- end }}
+{{- include "generate_env" . | indent 12 }}
           ports:
             - name: http
               containerPort: 8080

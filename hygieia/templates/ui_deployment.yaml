@@ -25,16 +25,13 @@ spec:
         command: 
           - 'sh'
           - '-c'
-          - 'until nslookup {{ .Release.Name }}-api; do echo waiting for hygieia-api; sleep 2; done;'
+          - 'until nslookup {{ template "api.name" . }}; do echo waiting for {{ template "api.name" . }}; sleep 2; done;'
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.ui.image.repository }}:{{ .Values.ui.image.tag }}"
           imagePullPolicy: {{ .Values.ui.image.pullPolicy }}
           env:
-{{-  range $key, $val := .Values.env }}
-            - name: {{ $key | quote }}
-              value: {{ toString $val | quote }}
-{{- end }}
+{{- include "generate_env" . | indent 12 }}
           ports:
             - name: http
               containerPort: 80
