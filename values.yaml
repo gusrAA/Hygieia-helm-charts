@@ -1,0 +1,21 @@
+# We're using an external MongoDB so we'll disable the k8s deployment
+mongodb:
+  enabled: false
+
+env:
+  # Setting to our internal mongodb
+  SPRING_DATA_MONGODB_HOST: mongodb
+  # Setting the port for our database
+  SPRING_DATA_MONGODB_PORT: 27017
+  # Setting up credentials for database
+  SPRING_DATA_MONGODB_DATABASE: hygieia
+  SPRING_DATA_MONGODB_USERNAME: hygieia
+  # This isn't actually the real password. Normally override it through
+  # CLI to keep it more secure.
+  SPRING_DATA_MONGODB_PASSWORD: dbpassword
+
+ingress:
+  enabled: true
+  path: /
+  hosts:
+    - hygieia.aa.com
