@@ -1,45 +1,44 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: {{ template "hygieia-api-audit.fullname" . }}
+  name: {{ template "api.name" . }}
   labels:
-    app: {{ template "hygieia-api-audit.name" . }}
-    chart: {{ template "hygieia-api-audit.chart" . }}
+    app: {{ template "hygieia.name" . }}
+    chart: {{ template "hygieia.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.api.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "hygieia-api-audit.name" . }}
+      app: {{ template "hygieia.name" . }}
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "hygieia-api-audit.name" . }}
+        app: {{ template "hygieia.name" . }}
         release: {{ .Release.Name }}
     spec:
       initContainers:
-      - name: waiting-for-mongodb
+{{- if .Values.mongodb.enabled }}
+      - name: wait-for-mongo
         image: busybox
         command: 
           - 'sh'
           - '-c'
           - 'until nslookup {{ .Release.Name }}-mongodb; do echo waiting for mongodb; sleep 2; done;'
+{{- end }}
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.api.image.repository }}:{{ .Values.api.image.tag }}"
+          imagePullPolicy: {{ .Values.api.image.pullPolicy }}
           env:
-{{-  range $key, $val := .Values.env }}
-            - name: {{ $key | quote }}
-              value: {{ toString $val | quote }}
-{{- end }}
+{{- include "generate_env" . | indent 12 }}
           ports:
             - name: http
               containerPort: 8080
               protocol: TCP
-# TODO: Find or implement a healthcheck api
+# TODO: Find or implement a healthcheck for api
 #          livenessProbe:
 #            httpGet:
 #              path: /
@@ -49,16 +48,16 @@ spec:
 #              path: /
 #              port: http
           resources:
-{{ toYaml .Values.resources | indent 12 }}
-    {{- with .Values.nodeSelector }}
+{{ toYaml .Values.api.resources | indent 12 }}
+    {{- with .Values.api.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
     {{- end }}
-    {{- with .Values.affinity }}
+    {{- with .Values.api.affinity }}
       affinity:
 {{ toYaml . | indent 8 }}
     {{- end }}
-    {{- with .Values.tolerations }}
+    {{- with .Values.api.tolerations }}
       tolerations:
 {{ toYaml . | indent 8 }}
     {{- end }}

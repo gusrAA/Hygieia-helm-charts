@@ -1,13 +1,13 @@
 {{- if .Values.ingress.enabled -}}
-{{- $fullName := include "hygieia-ui.fullname" . -}}
+{{- $fullName := include "hygieia.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
-    app: {{ template "hygieia-ui.name" . }}
-    chart: {{ template "hygieia-ui.chart" . }}
+    app: {{ template "hygieia.name" . }}
+    chart: {{ template "hygieia.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 {{- with .Values.ingress.annotations }}
@@ -32,7 +32,7 @@ spec:
         paths:
           - path: {{ $ingressPath }}
             backend:
-              serviceName: {{ $fullName }}
+              serviceName: {{ $fullName }}-ui
               servicePort: http
   {{- end }}
 {{- end }}

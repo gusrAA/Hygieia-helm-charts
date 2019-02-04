@@ -1,43 +1,40 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: {{ template "api.fullname" . }}
+  name: {{ template "hygieia.fullname" . }}-ui
   labels:
-    app: {{ template "api.name" . }}
-    chart: {{ template "api.chart" . }}
+    app: {{ template "hygieia.name" . }}
+    chart: {{ template "hygieia.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.ui.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "api.name" . }}
+      app: {{ template "hygieia.name" . }}
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "api.name" . }}
+        app: {{ template "hygieia.name" . }}
         release: {{ .Release.Name }}
     spec:
       initContainers:
-      - name: wait-for-mongo
+      - name: waiting-for-api
         image: busybox
         command: 
           - 'sh'
           - '-c'
-          - 'until nslookup {{ .Release.Name }}-mongodb; do echo waiting for mongodb; sleep 2; done;'
+          - 'until nslookup {{ template "api.name" . }}; do echo waiting for {{ template "api.name" . }}; sleep 2; done;'
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.ui.image.repository }}:{{ .Values.ui.image.tag }}"
+          imagePullPolicy: {{ .Values.ui.image.pullPolicy }}
           env:
-{{-  range $key, $val := .Values.env }}
-            - name: {{ $key | quote }}
-              value: {{ toString $val | quote }}
-{{- end }}
+{{- include "generate_env" . | indent 12 }}
           ports:
             - name: http
-              containerPort: 8080
+              containerPort: 80
               protocol: TCP
 # TODO: Find or implement a healthcheck api
 #          livenessProbe:
@@ -49,16 +46,16 @@ spec:
 #              path: /
 #              port: http
           resources:
-{{ toYaml .Values.resources | indent 12 }}
-    {{- with .Values.nodeSelector }}
+{{ toYaml .Values.ui.resources | indent 12 }}
+    {{- with .Values.ui.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
     {{- end }}
-    {{- with .Values.affinity }}
+    {{- with .Values.ui.affinity }}
       affinity:
 {{ toYaml . | indent 8 }}
     {{- end }}
-    {{- with .Values.tolerations }}
+    {{- with .Values.ui.tolerations }}
       tolerations:
 {{ toYaml . | indent 8 }}
     {{- end }}

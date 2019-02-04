@@ -1,43 +1,40 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: {{ template "hygieia-ui.fullname" . }}
+  name: {{ template "audit.name" . }}
   labels:
-    app: {{ template "hygieia-ui.name" . }}
-    chart: {{ template "hygieia-ui.chart" . }}
+    app: {{ template "hygieia.name" . }}
+    chart: {{ template "hygieia.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.audit.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "hygieia-ui.name" . }}
+      app: {{ template "hygieia.name" . }}
       release: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: {{ template "hygieia-ui.name" . }}
+        app: {{ template "hygieia.name" . }}
         release: {{ .Release.Name }}
     spec:
       initContainers:
-      - name: waiting-for-api
+      - name: waiting-for-mongodb
         image: busybox
         command: 
           - 'sh'
           - '-c'
-          - 'until nslookup {{ .Release.Name }}-api; do echo waiting for hygieia-api; sleep 2; done;'
+          - 'until nslookup {{ .Release.Name }}-mongodb; do echo waiting for mongodb; sleep 2; done;'
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ .Values.audit.image.repository }}:{{ .Values.audit.image.tag }}"
+          imagePullPolicy: {{ .Values.audit.image.pullPolicy }}
           env:
-{{-  range $key, $val := .Values.env }}
-            - name: {{ $key | quote }}
-              value: {{ toString $val | quote }}
-{{- end }}
+{{- include "generate_env" . | indent 12 }}
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
               protocol: TCP
 # TODO: Find or implement a healthcheck api
 #          livenessProbe:
@@ -49,16 +46,16 @@ spec:
 #              path: /
 #              port: http
           resources:
-{{ toYaml .Values.resources | indent 12 }}
-    {{- with .Values.nodeSelector }}
+{{ toYaml .Values.audit.resources | indent 12 }}
+    {{- with .Values.audit.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
     {{- end }}
-    {{- with .Values.affinity }}
+    {{- with .Values.audit.affinity }}
       affinity:
 {{ toYaml . | indent 8 }}
     {{- end }}
-    {{- with .Values.tolerations }}
+    {{- with .Values.audit.tolerations }}
       tolerations:
 {{ toYaml . | indent 8 }}
     {{- end }}
